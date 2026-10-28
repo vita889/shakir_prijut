@@ -1,0 +1,20 @@
+# Node.js / Frontend
+node_modules/
+frontend/node_modules/
+.nuxt/
+frontend/.nuxt/
+.data/
+frontend/.data/
+
+# Go / Backend
+backend/tmp/
+backend/main
+*.exe
+
+# Env файлы
+.env
+*.local
+
+# Системные файлы
+.DS_Store
+Thumbs.db
