@@ -1,0 +1,45 @@
+version: '3.8' # Если ругается, что устарело — просто удалите эту строку
+
+services:
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: my_postgres_container
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: my_backend_container
+    environment:
+      PORT: 5000
+      DATABASE_URL: ${DATABASE_URL}
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres_db:
+        condition: service_healthy # Ждем, пока БД не будет готова
+
+  frontend:
+    build: ./frontend
+    container_name: my_frontend_container
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # <--- ВОТ ЭТА СТРОКА СПАСЕТ ОТ ОШИБКИ "nuxt: not found"
+    environment:
+      - NUXT_PUBLIC_API_BASE=http://localhost:5000
+
+volumes:
+  postgres_data:
